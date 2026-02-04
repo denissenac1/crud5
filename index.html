@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crud</title>
+</head>
+<body>
+
+    <h2>CRUD Básico</h2>
+
+    <!-- Campo de entrada para adicionar novo item -->
+<input id="addItem" placeholder="Nome do item">
+<!-- Botão que chama a função add() quando clicado -->
+<button onclick="add()">Adicionar</button><br><br>
+
+<!-- Campo para informar o ID do item a ser editado -->
+<input id="editPos" placeholder="ID do item">
+<!-- Campo para informar o novo nome do item -->
+<input id="editItem" placeholder="Novo nome">
+<!-- Botão que chama a função edit() quando clicado -->
+<button onclick="edit()">Editar</button><br><br>
+
+<!-- Campo para informar o ID do item a ser deletado -->
+<input id="delPos" placeholder="ID do item">
+<!-- Botão que chama a função delItem() quando clicado -->
+<button onclick="delItem()">Deletar</button><br><br>
+
+<!-- Botão que chama a função show() para visualizar todos os itens -->
+<button onclick="show()">Visualizar</button>
+<!-- Elemento pre-formatado onde a lista de itens será exibida -->
+<pre id="lista"></pre>
+
+<script>
+// Define a URL base da API (backend rodando na porta 3001)
+const URL = "http://localhost:3001/items";
+
+// Função assíncrona para buscar e exibir todos os itens
+async function show() {
+  // Faz requisição GET para a API para obter os itens
+  const res = await fetch(URL);
+  // Converte a resposta para JSON
+  const data = await res.json();
+  // Atualiza o conteúdo do elemento lista formatando cada item como "ID - Nome"
+  document.getElementById("lista").innerText =
+    data.map(item => `${item.id} - ${item.name}`).join("\n");
+}
+
+// Função assíncrona para adicionar novo item
+async function add() {
+  // Obtém o valor digitado no campo addItem
+  const name = document.getElementById("addItem").value;
+  // Faz requisição POST para a API enviando o nome do novo item
+  await fetch(URL, { 
+    method: "POST",                    // Método HTTP POST para criar recurso
+    headers: { "Content-Type": "application/json" }, // Define que está enviando JSON
+    body: JSON.stringify({ name })     // Converte o objeto para string JSON
+  });
+  // Limpa o campo de entrada após adicionar
+  document.getElementById("addItem").value = "";
+  // Atualiza a lista exibida
+  show();
+}
+
+// Função assíncrona para editar item existente
+async function edit() {
+  // Obtém o ID do item a ser editado
+  const id = document.getElementById("editPos").value;
+  // Obtém o novo nome para o item
+  const name = document.getElementById("editItem").value;
+  // Faz requisição PUT para a API para atualizar o item específico
+  await fetch(`${URL}/${id}`, { 
+    method: "PUT",                     // Método HTTP PUT para atualizar recurso
+    headers: { "Content-Type": "application/json" }, // Define que está enviando JSON
+    body: JSON.stringify({ name })     // Converte o objeto para string JSON
+  });
+  // Limpa os campos de entrada após editar
+  document.getElementById("editPos").value = "";
+  document.getElementById("editItem").value = "";
+  // Atualiza a lista exibida
+  show();
+}
+
+// Função assíncrona para deletar item
+async function delItem() {
+  // Obtém o ID do item a ser deletado
+  const id = document.getElementById("delPos").value;
+  // Faz requisição DELETE para a API para remover o item específico
+  await fetch(`${URL}/${id}`, { method: "DELETE" }); // Método HTTP DELETE
+  // Limpa o campo de entrada após deletar
+  document.getElementById("delPos").value = "";
+  // Atualiza a lista exibida
+  show();
+}
+
+// Chama a função show() automaticamente quando a página carrega
+// para exibir os itens existentes
+show();
+</script>
+
+</body>
+</html>
